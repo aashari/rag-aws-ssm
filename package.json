@@ -1,0 +1,24 @@
+{
+  "name": "aws-send-ssm-command",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": false,
+  "version": "1.0.0",
+  "description": "A utility for executing shell commands on AWS EC2 instances via SSM with enhanced output formatting",
+  "bin": {
+    "aws-send-ssm-command": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.750.0",
+    "commander": "^13.1.0"
+  }
+}
