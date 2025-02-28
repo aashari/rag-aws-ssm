@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('rag-aws-ssm-command')
   .description('A utility for AWS SSM command execution and file transfer, part of the RAG tool suite')
-  .version('1.2.3')
+  .version('1.3.0')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
   .option('--command <command>', 'Bash command to run')
   .option('--local-file <path>', 'Local file to upload to the instance')
