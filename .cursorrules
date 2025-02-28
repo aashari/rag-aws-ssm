@@ -1,0 +1,161 @@
+# AWS Send SSM Command - Cursor AI Rules
+
+# Project Overview
+This is a CLI tool for executing commands and transferring files to AWS EC2 instances via SSM (Systems Manager).
+It's built with TypeScript and Bun runtime, using the Commander.js library for CLI argument parsing.
+
+# Project Structure
+- `src/index.ts`: Main entry point and core functionality
+- `package.json`: Project configuration and dependencies
+- `tsconfig.json`: TypeScript configuration
+- `README.md`: Documentation
+
+# Code Organization
+- CLI argument handling (Commander.js) at the top of index.ts
+- Helper functions in the middle section
+- Main execution flow in the main() function at the bottom
+
+# Development Workflow
+
+## Adding New Features
+1. Create a feature branch from main
+2. Implement the feature in src/index.ts
+3. Add appropriate error handling
+4. Update CLI options in Commander.js setup if needed
+5. Update documentation in README.md
+6. Test the feature locally using bun run src/index.ts
+7. Commit changes with descriptive commit message
+8. Bump version in package.json and src/index.ts (both places must be synchronized)
+9. Create git tag for the version
+10. Merge to main and push all changes including the tag
+
+## Versioning Guidelines
+- Follow semantic versioning (MAJOR.MINOR.PATCH)
+- Bump MAJOR for breaking changes
+- Bump MINOR for new features
+- Bump MINOR for bug fixes
+- Version must be updated in both:
+  - package.json: `"version": "x.y.z"`
+  - src/index.ts: `.version('x.y.z')`
+- Create a git tag for each version: `git tag -a vX.Y.Z -m "Version X.Y.Z - Description"`
+
+## Error Handling Best Practices
+- Use the `printError()` function for all errors
+- Categorize errors using `getErrorType()`
+- Provide helpful suggestions using `getSuggestion()`
+- Always exit with process.exit(1) after printing an error
+
+## File Structure Patterns
+- Keep all code in src/index.ts for now (until the project grows larger)
+- Use TypeScript types and interfaces for better code documentation
+- Use JSDoc comments for function documentation
+
+## Code Style Guidelines
+- Use camelCase for variable and function names
+- Use PascalCase for class names and types
+- Use descriptive variable names
+- Add JSDoc comments for functions
+- Group related functionality together
+
+## Testing
+- Test changes locally using real AWS instances
+- Test each feature with valid and invalid inputs
+- Test error scenarios
+- Test file transfer with various file types and sizes
+
+## Deployment
+- The tool is meant to be installed globally via bun link
+- After changes, run `bun link` to update the global command
+
+# Common Tasks
+
+## Adding a CLI Option
+```typescript
+program
+  .option('--new-option <value>', 'Description of the new option')
+```
+
+## Adding File Transfer Feature
+See the implementation of `readLocalFile()` and `generateFileTransferCommand()` functions.
+
+## Adding Error Handling
+```typescript
+try {
+  // Code that might fail
+} catch (error) {
+  printError('Error message', error, getSuggestion(error));
+  process.exit(1);
+}
+```
+
+## Updating Version
+1. Update in package.json: `"version": "x.y.z"`
+2. Update in src/index.ts: `.version('x.y.z')`
+3. Commit: `git commit -m "Bump version to x.y.z"`
+4. Tag: `git tag -a vx.y.z -m "Version x.y.z - Description"`
+5. Push: `git push && git push --tags`
+
+# AWS SDK Integration
+- The tool uses @aws-sdk/client-ssm for AWS integration
+- SSM commands are created using SendCommandCommand
+- Results are fetched using GetCommandInvocationCommand
+- AWS region is configurable via --region option
+
+# Key Components
+
+## Command Execution Flow
+1. Parse CLI options using Commander.js
+2. Validate input requirements
+3. Prepare the command (regular command or file transfer)
+4. Initialize AWS SSM client
+5. Send command to instance
+6. If --wait is true (default), poll for command completion
+7. Display formatted output
+
+## File Transfer Flow
+1. Read local file and encode to base64
+2. Generate a shell script for decoding and writing on remote instance
+3. Execute the script via SSM
+4. Display formatted output with file stats
+
+## Sudo Flag Implementation
+1. For command execution:
+   - Check if the command already starts with "sudo " to avoid duplicates
+   - If --sudo is provided and not a duplicate, prefix command with "sudo "
+2. For file transfers:
+   - Use sudo for directory creation (mkdir -p)
+   - Use sudo for the file write operation
+
+## Directory Creation
+- The file transfer automatically creates the parent directory of the remote file if it doesn't exist
+- Uses `mkdir -p` for recursive directory creation
+- Applies sudo if the --sudo flag is provided
+- Checks directory creation success before attempting to write the file
+
+## Output Formatting
+- Use printInfo() for section headers with timestamps
+- Use printKeyValue() for key-value pair formatting
+- Use printCommandOutput() for command results
+- Use printError() for error messages
+
+# Feature Testing Guidelines
+
+## Testing Sudo Functionality
+1. Test command execution with --sudo flag on a command that doesn't have sudo
+   - Expected: Command is prefixed with sudo
+2. Test command execution with --sudo flag on a command that already has sudo
+   - Expected: No duplicate sudo is added
+3. Test file transfer to a privileged directory with --sudo flag
+   - Expected: File is transferred successfully with sudo privileges
+4. Test file transfer to non-existent directory paths with --sudo flag
+   - Expected: Directory is created with sudo and file is transferred
+
+## Testing Directory Creation
+1. Test file transfer to existing directory
+   - Expected: File is transferred successfully
+2. Test file transfer to non-existent directory
+   - Expected: Directory is created automatically and file is transferred
+3. Test file transfer to deeply nested non-existent directories
+   - Expected: All directories in path are created recursively and file is transferred
+4. Test file transfer to a path where directory creation requires sudo
+   - Expected: Error without --sudo flag, success with --sudo flag 
