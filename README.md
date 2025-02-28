@@ -79,9 +79,6 @@ aws-send-ssm-command --target <instance-id> --local-file <local-file-path> --rem
 | `--region` | AWS region for the operation | `ap-southeast-1` | `us-east-1` |
 | `--sudo` | Use sudo for commands/files | `false` | `--sudo` |
 | `--wait` | Wait for command completion | `true` | `false` |
-| `--timeout` | Command timeout in seconds | `600` | `1800` |
-| `--output-format` | Output format (json, text) | `text` | `json` |
-| `--comment` | Add a comment to the command | - | `"Monthly maintenance"` |
 
 ### Basic Examples
 
@@ -116,21 +113,21 @@ done
 "
 
 # Execute with specific timeout
-aws-send-ssm-command --target i-0123456789abcdef0 --command "yum update -y" --timeout 3600
+aws-send-ssm-command --target i-0123456789abcdef0 --command "yum update -y"
 
-# Get JSON output for automation
-aws-send-ssm-command --target i-0123456789abcdef0 --command "systemctl status nginx" --output-format json
+# Check service status
+aws-send-ssm-command --target i-0123456789abcdef0 --command "systemctl status nginx"
 ```
 
 ### AWS SSO Integration
 
 ```bash
 # Using specific role via AWS SSO
-aws-sso-util run-as --account-id 123456789012 --role-name AdminRole -- \\
+aws-sso-util run-as --account-id 123456789012 --role-name AdminRole -- \
   aws-send-ssm-command --target i-0123456789abcdef0 --command "whoami"
 
 # Using saved profile for file transfer
-aws-sso-util run-as --profile my-aws-profile -- \\
+aws-sso-util run-as --profile my-aws-profile -- \
   aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./app.config --remote-file /var/www/html/app.config
 ```
 
@@ -238,7 +235,7 @@ Destination File: /home/ec2-user/config.json
 | SSM Agent Issues     | `Failed to connect to the instance`              | Ensure SSM agent is running               |
 | Permission Denied    | `User not authorized to perform ssm:SendCommand` | Check IAM permissions                      |
 | Sudo Required        | `Failed to write file to remote path`            | Use the `--sudo` flag for operations requiring elevated privileges |
-| Command Timeout      | `CommandTimedOut`                                | Increase timeout value                     |
+| Command Timeout      | `CommandTimedOut`                                | The command took too long to execute. Consider breaking it into smaller commands |
 | File Not Found       | `Failed to read local file: File not found`      | Verify the local file path                |
 | Write Permission     | `Failed to write file to remote path`            | Check permissions on the remote directory or use `--sudo` |
 
@@ -348,9 +345,6 @@ To integrate with your AI assistant, copy and paste the following instructions i
     | `--region`        | AWS region for the operation | `ap-southeast-1` | `us-east-1`             |
     | `--sudo`          | Use sudo for commands/files  | `false`          | `--sudo`                |
     | `--wait`          | Wait for command completion  | `true`           | `false`                 |
-    | `--timeout`       | Command timeout in seconds   | `600`            | `1800`                  |
-    | `--output-format` | Output format (json, text)   | `text`           | `json`                  |
-    | `--comment`       | Add a comment to the command | -                | `"Monthly maintenance"` |
 
     ## USAGE EXAMPLES
 
@@ -383,8 +377,8 @@ To integrate with your AI assistant, copy and paste the following instructions i
     aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./setup.sh --remote-file /home/ec2-user/setup.sh
     aws-send-ssm-command --target i-0123456789abcdef0 --command "chmod +x /home/ec2-user/setup.sh && /home/ec2-user/setup.sh"
 
-    # Transfer a large file with longer timeout
-    aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./large-data.bin --remote-file /home/ec2-user/data.bin --timeout 1800
+    # Transfer a large file
+    aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./large-data.bin --remote-file /home/ec2-user/data.bin
     ```
 
     ### Advanced Usage
@@ -402,22 +396,22 @@ To integrate with your AI assistant, copy and paste the following instructions i
     done
     "
 
-    # Execute with specific timeout
-    aws-send-ssm-command --target i-0123456789abcdef0 --command "yum update -y" --timeout 3600
+    # Execute system update
+    aws-send-ssm-command --target i-0123456789abcdef0 --command "yum update -y"
 
-    # Get JSON output for automation
-    aws-send-ssm-command --target i-0123456789abcdef0 --command "systemctl status nginx" --output-format json
+    # Check service status
+    aws-send-ssm-command --target i-0123456789abcdef0 --command "systemctl status nginx"
     ```
 
     ### With AWS SSO
 
     ```bash
     # Using specific role via AWS SSO
-    aws-sso-util run-as --account-id 123456789012 --role-name AdminRole -- \\
+    aws-sso-util run-as --account-id 123456789012 --role-name AdminRole -- \
     aws-send-ssm-command --target i-0123456789abcdef0 --command "whoami"
 
     # Using saved profile for file transfer
-    aws-sso-util run-as --profile my-aws-profile -- \\
+    aws-sso-util run-as --profile my-aws-profile -- \
     aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./app.config --remote-file /var/www/html/app.config
     ```
 
@@ -475,7 +469,7 @@ To integrate with your AI assistant, copy and paste the following instructions i
     | SSM Agent Issues     | `Failed to connect to the instance`              | Ensure SSM agent is running               |
     | Permission Denied    | `User not authorized to perform ssm:SendCommand` | Check IAM permissions                      |
     | Sudo Required        | `Failed to write file to remote path`            | Use the `--sudo` flag for operations requiring elevated privileges |
-    | Command Timeout      | `CommandTimedOut`                                | Increase timeout value                     |
+    | Command Timeout      | `CommandTimedOut`                                | The command took too long to execute. Consider breaking it into smaller commands |
     | File Not Found       | `Failed to read local file: File not found`      | Verify the local file path                |
     | Write Permission     | `Failed to write file to remote path`            | Check permissions on the remote directory or use `--sudo` |
 

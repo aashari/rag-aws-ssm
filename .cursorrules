@@ -5,15 +5,19 @@ This is a CLI tool for executing commands and transferring files to AWS EC2 inst
 It's built with TypeScript and Bun runtime, using the Commander.js library for CLI argument parsing.
 
 # Project Structure
-- `src/index.ts`: Main entry point and core functionality
+- `src/index.ts`: Main entry point and CLI configuration
+- `src/commands/`: Command implementation modules
+- `src/utils/`: Utility functions and helpers
+- `src/types/`: TypeScript type definitions
 - `package.json`: Project configuration and dependencies
 - `tsconfig.json`: TypeScript configuration
 - `README.md`: Documentation
 
 # Code Organization
-- CLI argument handling (Commander.js) at the top of index.ts
-- Helper functions in the middle section
-- Main execution flow in the main() function at the bottom
+- CLI argument handling (Commander.js) in src/index.ts
+- Command implementation in src/commands/ directory
+- Helper functions in src/utils/ directory
+- Type definitions in src/types/ directory
 
 # Development Workflow
 
@@ -102,6 +106,7 @@ try {
 - SSM commands are created using SendCommandCommand
 - Results are fetched using GetCommandInvocationCommand
 - AWS region is configurable via --region option
+- This codebase has been refactored into a modular architecture
 
 # Key Components
 
