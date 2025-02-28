@@ -234,7 +234,7 @@ function getSuggestion(error: any): string {
   // Credential errors
   if (error?.message?.includes('credentials') || 
       error?.message?.includes('could not be refreshed')) {
-    return "Try running 'aws sso login' to refresh your credentials, or check your AWS config.";
+    return "Ensure you have valid AWS credentials configured. Check your environment variables, AWS config files, or use the appropriate credential provider.";
   }
   
   // Permission errors

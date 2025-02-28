@@ -232,7 +232,7 @@ Destination File: /home/ec2-user/config.json
 
 | Issue | Error Message | Solution |
 | --- | --- | --- |
-| Authentication Error | `Could not load credentials from any providers` | Run `aws sso login` to refresh credentials |
+| Authentication Error | `Could not load credentials from any providers` | Ensure you have valid AWS credentials configured through environment variables or config files |
 | Instance Not Found | `InvalidInstanceId: i-0123456789abcdef0` | Verify instance ID and state |
 | SSM Agent Issues | `Failed to connect to the instance` | Ensure SSM agent is running |
 | Permission Denied | `User not authorized to perform ssm:SendCommand` | Check IAM permissions |
@@ -458,7 +458,7 @@ To integrate with your AI assistant, copy and paste the following instructions i
 
     | Issue                | Error Message                                    | Solution                                   |
     | -------------------- | ------------------------------------------------ | ------------------------------------------ |
-    | Authentication Error | `Could not load credentials from any providers`  | Run `aws sso login` to refresh credentials |
+    | Authentication Error | `Could not load credentials from any providers`  | Ensure you have valid AWS credentials configured through environment variables or config files |
     | Instance Not Found   | `InvalidInstanceId: i-0123456789abcdef0`         | Verify instance ID and state              |
     | SSM Agent Issues     | `Failed to connect to the instance`              | Ensure SSM agent is running               |
     | Permission Denied    | `User not authorized to perform ssm:SendCommand` | Check IAM permissions                      |
