@@ -5,6 +5,8 @@ import {
   SendCommandCommand,
   GetCommandInvocationCommand 
 } from '@aws-sdk/client-ssm';
+import fs from 'fs';
+import path from 'path';
 
 const program = new Command();
 
@@ -13,13 +15,40 @@ program
   .description('Send commands to AWS instances via SSM')
   .version('1.0.0')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
-  .requiredOption('--command <command>', 'Bash command to run')
+  .option('--command <command>', 'Bash command to run')
+  .option('--local-file <path>', 'Local file to upload to the instance')
+  .option('--remote-file <path>', 'Remote path where the file should be saved')
   .option('--wait', 'Wait for command to complete', true)
   .option('--region <region>', 'AWS region', 'ap-southeast-1');
+
+// Make command optional when using file transfer
+program.addHelpText('after', `
+To run a command:
+  $ aws-send-ssm-command --target i-0123456789abcdef0 --command "df -h"
+
+To transfer a file:
+  $ aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./myfile.txt --remote-file /home/ec2-user/myfile.txt
+`);
 
 program.parse();
 
 const options = program.opts();
+
+// Validate that either command or both local-file and remote-file are provided
+if (!options.command && !(options.localFile && options.remoteFile)) {
+  console.error('Error: You must provide either --command or both --local-file and --remote-file');
+  process.exit(1);
+}
+
+if (options.localFile && !options.remoteFile) {
+  console.error('Error: When using --local-file, you must also provide --remote-file');
+  process.exit(1);
+}
+
+if (!options.localFile && options.remoteFile) {
+  console.error('Error: When using --remote-file, you must also provide --local-file');
+  process.exit(1);
+}
 
 /**
  * Format the current date and time in human-readable local and UTC ISO formats
@@ -222,17 +251,89 @@ function getSuggestion(error: any): string {
   return "Check AWS CLI configuration and try again. Run with AWS_DEBUG=true for more details.";
 }
 
+/**
+ * Read a local file and prepare it for transfer
+ * @param filePath Path to the local file
+ * @returns The base64-encoded file content
+ */
+function readLocalFile(filePath: string): string {
+  try {
+    // Check if file exists and is readable
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    
+    // Read file as buffer
+    const fileContent = fs.readFileSync(filePath);
+    
+    // Convert to base64 for safe transmission
+    return fileContent.toString('base64');
+  } catch (error) {
+    throw new Error(`Failed to read local file: ${(error as Error).message}`);
+  }
+}
+
+/**
+ * Generate a command to write base64 content to a remote file
+ * @param base64Content Base64-encoded file content
+ * @param remotePath Destination path on the remote instance
+ * @returns A shell command string
+ */
+function generateFileTransferCommand(base64Content: string, remotePath: string): string {
+  // Create shell command to decode base64 and write to file
+  return `
+echo '${base64Content}' | base64 --decode > "${remotePath}"
+if [ $? -eq 0 ]; then
+  echo "File successfully transferred to ${remotePath}"
+  ls -la "${remotePath}"
+else
+  echo "Failed to write file to ${remotePath}"
+  exit 1
+fi
+`;
+}
+
 async function main() {
-  const { target, command, region, wait } = options;
+  const { target, command, localFile, remoteFile, region, wait } = options;
+  
+  let effectiveCommand = command;
+  let operationType = 'command execution';
+  
+  // If using file transfer, generate the appropriate command
+  if (localFile && remoteFile) {
+    try {
+      operationType = 'file transfer';
+      const fileContent = readLocalFile(localFile);
+      effectiveCommand = generateFileTransferCommand(fileContent, remoteFile);
+      
+      // Get file size for reporting
+      const stats = fs.statSync(localFile);
+      const fileSizeKB = (stats.size / 1024).toFixed(2);
+      const fileName = path.basename(localFile);
+      
+      // Include file size in log
+      printInfo('FILE TRANSFER INITIATED', {
+        'Source File': localFile,
+        'Destination': remoteFile,
+        'File Size': `${fileSizeKB} KB`,
+        'File Name': fileName
+      });
+    } catch (error) {
+      printError('Failed to prepare file for transfer', error, 
+        'Ensure the file exists and you have permission to read it.');
+      process.exit(1);
+    }
+  }
   
   // Get current timestamp for command send
   const sendTime = formatTimestamp();
-  printInfo('SENDING COMMAND', {
+  printInfo(`SENDING ${operationType.toUpperCase()}`, {
     'Target EC2 Instance': target,
     'AWS Region': region,
     'Local Time': sendTime.localTime,
     'UTC Time': sendTime.utcTime,
-    'Command': command,
+    'Operation Type': operationType,
+    ...(!localFile ? { 'Command': command } : {}),
     'Wait for completion': wait ? 'Yes' : 'No'
   });
   
@@ -252,7 +353,7 @@ async function main() {
         DocumentName: 'AWS-RunShellScript',
         InstanceIds: [target],
         Parameters: {
-          commands: [command],
+          commands: [effectiveCommand],
         },
       })
     );
@@ -266,14 +367,25 @@ async function main() {
       process.exit(1);
     }
     
-    printInfo('COMMAND SENT SUCCESSFULLY', {
+    // Update success message based on the operation type
+    printInfo(`${operationType.toUpperCase()} SENT SUCCESSFULLY`, {
       'Command ID': commandId,
       'Document Name': 'AWS-RunShellScript',
-      'Target Instance': target
+      'Target Instance': target,
+      ...(operationType === 'file transfer' ? {
+        'Transfer Type': 'Base64 encoded file transfer',
+        'Source File': options.localFile,
+        'Destination Path': options.remoteFile
+      } : {})
     });
     
     if (wait) {
-      console.log('Waiting for the result of the command execution...');
+      // Update waiting message based on operation type
+      if (operationType === 'file transfer') {
+        console.log('Waiting for file transfer to complete...');
+      } else {
+        console.log('Waiting for the result of the command execution...');
+      }
       console.log('The system is polling AWS SSM service for command completion...\n');
       
       // Poll for command completion
@@ -327,34 +439,55 @@ async function main() {
       // Get current timestamp for response received
       const responseTime = formatTimestamp();
       
+      // Define the operation-specific headers
+      const operationHeader = operationType === 'file transfer' ? 'FILE TRANSFER RESULT' : 'COMMAND OUTPUT';
+      
       // Print the command output with enhanced metadata
       printCommandOutput(output.trim(), status, {
         'Command ID': commandId,
         'Target Instance': target,
+        'Operation': operationType.charAt(0).toUpperCase() + operationType.slice(1),
         'Execution Start': executionStartTime,
         'Execution End': executionEndTime || 'Unknown',
         'Duration': `${duration.toFixed(2)} seconds`,
         'Response Time': responseTime.localTime,
-        'Response Time UTC': responseTime.utcTime
+        'Response Time UTC': responseTime.utcTime,
+        ...(operationType === 'file transfer' ? {
+          'Source File': options.localFile,
+          'Destination File': options.remoteFile,
+          'File Size': `${(fs.statSync(options.localFile).size / 1024).toFixed(2)} KB`
+        } : {})
       });
       
       if (status !== 'Success') {
-        printError(`Command completed with non-success status: ${status}`, 
-                  { message: `The command execution failed with status: ${status}` },
+        const errorMessage = operationType === 'file transfer' 
+          ? `File transfer failed with status: ${status}`
+          : `Command execution failed with status: ${status}`;
+        
+        printError(`${operationType.toUpperCase()} completed with non-success status: ${status}`, 
+                  { message: errorMessage },
                   'Check the output above for error details. There may be information in the standard error output.');
         process.exit(1);
       } else {
-        printInfo('EXECUTION COMPLETED SUCCESSFULLY', {
+        const successMessage = operationType === 'file transfer' 
+          ? 'FILE TRANSFER COMPLETED SUCCESSFULLY'
+          : 'EXECUTION COMPLETED SUCCESSFULLY';
+        
+        printInfo(successMessage, {
           'Status': 'Success',
           'Command ID': commandId,
           'Target Instance': target,
           'Duration': `${duration.toFixed(2)} seconds`,
-          'Output Length': `${output.trim().length} characters`
+          'Output Length': `${output.trim().length} characters`,
+          ...(operationType === 'file transfer' ? {
+            'Source File': options.localFile,
+            'Destination File': options.remoteFile
+          } : {})
         });
       }
     } else {
-      printInfo('SUCCESS - COMMAND SENT', {
-        'Message': 'Command sent successfully, but not waiting for results',
+      printInfo(`SUCCESS - ${operationType.toUpperCase()} INITIATED`, {
+        'Message': `${operationType.charAt(0).toUpperCase() + operationType.slice(1)} initiated successfully, but not waiting for results`,
         'Command ID': commandId,
         'Target Instance': target,
         'Note': 'To check results later, use AWS console or AWS CLI with the Command ID'
@@ -362,7 +495,11 @@ async function main() {
     }
     
   } catch (error) {
-    printError('Error executing SSM command', error, getSuggestion(error));
+    const errorMessage = operationType === 'file transfer' 
+      ? 'Error transferring file via SSM'
+      : 'Error executing SSM command';
+    
+    printError(errorMessage, error, getSuggestion(error));
     process.exit(1);
   }
 }
