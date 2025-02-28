@@ -1,5 +1,5 @@
 /**
- * Types for aws-send-ssm-command
+ * Types for rag-aws-ssm-command
  */
 
 export interface CommandOptions {

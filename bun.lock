@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "aws-send-ssm-command",
+      "name": "rag-aws-ssm-command",
       "dependencies": {
         "@aws-sdk/client-ssm": "^3.758.0",
         "commander": "^13.1.0",

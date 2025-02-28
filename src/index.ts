@@ -8,8 +8,8 @@ import { printError } from './utils/error-handling';
 const program = new Command();
 
 program
-  .name('aws-send-ssm-command')
-  .description('Send commands to AWS instances via SSM')
+  .name('rag-aws-ssm-command')
+  .description('A utility for AWS SSM command execution and file transfer, part of the RAG tool suite')
   .version('1.2.3')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
   .option('--command <command>', 'Bash command to run')
@@ -23,16 +23,16 @@ program
 program.addHelpText('after', `
 Examples:
   To run a command:
-    $ aws-send-ssm-command --target i-0123456789abcdef0 --command "df -h"
+    $ rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
 
   To transfer a file:
-    $ aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./myfile.txt --remote-file /home/ec2-user/myfile.txt
+    $ rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./myfile.txt --remote-file /home/ec2-user/myfile.txt
 
   To run a command with sudo:
-    $ aws-send-ssm-command --target i-0123456789abcdef0 --command "apt update" --sudo
+    $ rag-aws-ssm-command --target i-0123456789abcdef0 --command "apt update" --sudo
 
   To transfer a file to a protected directory:
-    $ aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./nginx.conf --remote-file /etc/nginx/nginx.conf --sudo
+    $ rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./nginx.conf --remote-file /etc/nginx/nginx.conf --sudo
 `);
 
 program.parse();
