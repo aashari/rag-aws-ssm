@@ -137,21 +137,6 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-fil
 
 `rag-aws-ssm-command` provides structured output suitable for AI system integration. The tool's consistent output format and error handling make it ideal for automated workflows and AI-driven infrastructure management.
 
-### Example AI Request
-
-```json
-{
-  "tool": "rag-aws-ssm-command",
-  "action": {
-    "target": "i-0123456789abcdef0",
-    "command": "ls -la",
-    "wait": true
-  }
-}
-```
-
-**Response**: Command output with metadata (status, duration, etc.).
-
 ### Capabilities
 
 - **Command Execution**: Run any shell command with status tracking.
