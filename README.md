@@ -135,9 +135,9 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-fil
 
 ### Integration with AI Systems
 
-While primarily CLI-focused, `rag-aws-ssm-command` can be adapted for AI workflows by scripting calls or extending it with an MCP server (future enhancement). It provides structured output suitable for parsing.
+`rag-aws-ssm-command` provides structured output suitable for AI system integration. The tool's consistent output format and error handling make it ideal for automated workflows and AI-driven infrastructure management.
 
-### Example AI Request (Hypothetical)
+### Example AI Request
 
 ```json
 {
@@ -157,6 +157,25 @@ While primarily CLI-focused, `rag-aws-ssm-command` can be adapted for AI workflo
 - **Command Execution**: Run any shell command with status tracking.
 - **File Deployment**: Transfer files securely via base64 encoding.
 - **Error Handling**: Detailed error messages and suggestions for resolution.
+
+---
+
+## Roadmap
+
+Future enhancements planned for `rag-aws-ssm-command`:
+
+1. **MCP Integration**: Add support for Model Control Protocol (MCP) server integration for seamless AI system communication.
+2. **Batch Operations**: Support for executing commands across multiple instances simultaneously.
+3. **Interactive Mode**: Shell-like interactive mode for running multiple commands in sequence.
+4. **Output Templates**: Customizable output formatting templates.
+5. **Enhanced AI Features**: 
+   - Structured JSON output mode
+   - AI-friendly error formats
+   - Context-aware command suggestions
+6. **Security Enhancements**:
+   - Command allowlist/blocklist
+   - Enhanced IAM role support
+   - Command audit logging
 
 ---
 
