@@ -349,7 +349,10 @@ const main = async () => {
       });
     } else if (command) {
       // If sudo flag is provided, prefix the command with sudo
-      effectiveCommand = sudo ? `sudo ${command}` : command;
+      // But only if the command doesn't already start with sudo
+      const trimmedCommand = command.trim();
+      const alreadyHasSudo = trimmedCommand.startsWith('sudo ');
+      effectiveCommand = sudo && !alreadyHasSudo ? `sudo ${command}` : command;
       
       printInfo('SENDING COMMAND', {
         'Target Instance': target,
