@@ -58,6 +58,8 @@ It's built with TypeScript and Bun runtime, using the Commander.js library for C
 - Group related functionality together
 
 ## Testing
+- Always run tests using `bun run src/index.ts` instead of `aws-send-ssm-command` directly
+- This ensures testing is done on the current code rather than the installed version
 - Test changes locally using real AWS instances
 - Test each feature with valid and invalid inputs
 - Test error scenarios
