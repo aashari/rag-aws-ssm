@@ -25,12 +25,24 @@ export async function executeCommand(options: CommandOptions): Promise<void> {
   const alreadyHasSudo = trimmedCommand.startsWith('sudo ');
   const effectiveCommand = sudo && !alreadyHasSudo ? `sudo ${command}` : command;
 
+  // Determine sudo status message
+  let sudoStatusMessage: string;
+  if (alreadyHasSudo && sudo) {
+    sudoStatusMessage = 'Yes (in command and via flag)';
+  } else if (alreadyHasSudo) {
+    sudoStatusMessage = 'Yes (in command)';
+  } else if (sudo) {
+    sudoStatusMessage = 'Yes (via flag)';
+  } else {
+    sudoStatusMessage = 'No';
+  }
+
   // Display command information
   printInfo('SENDING COMMAND', {
     'Target Instance': target,
     'Region': region || 'ap-southeast-1',
     'Command': effectiveCommand,
-    'Using Sudo': sudo ? 'Yes' : 'No'
+    'Using Sudo': sudoStatusMessage
   });
 
   try {

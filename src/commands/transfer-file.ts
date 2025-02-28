@@ -46,7 +46,7 @@ export async function transferFile(options: CommandOptions): Promise<void> {
       'Destination': remoteFile,
       'File Size': `${fileSizeKB} KB`,
       'File Name': fileName,
-      'Using Sudo': sudo ? 'Yes' : 'No',
+      'Using Sudo': sudo ? 'Yes (for directory creation and file writing)' : 'No',
       'Target Instance': target,
       'Region': region || 'ap-southeast-1'
     });
