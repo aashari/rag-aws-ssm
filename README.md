@@ -77,6 +77,7 @@ aws-send-ssm-command --target <instance-id> --local-file <local-file-path> --rem
 | Parameter | Description | Default | Example |
 | --- | --- | --- | --- |
 | `--region` | AWS region for the operation | `ap-southeast-1` | `us-east-1` |
+| `--sudo` | Use sudo for commands/files | `false` | `--sudo` |
 | `--wait` | Wait for command completion | `true` | `false` |
 | `--timeout` | Command timeout in seconds | `600` | `1800` |
 | `--output-format` | Output format (json, text) | `text` | `json` |
@@ -228,17 +229,18 @@ Destination File: /home/ec2-user/config.json
 
 ## Troubleshooting
 
-### Common Issues
+### Common Issues and Solutions
 
-| Issue | Error Message | Solution |
-| --- | --- | --- |
-| Authentication Error | `Could not load credentials from any providers` | Ensure you have valid AWS credentials configured through environment variables or config files |
-| Instance Not Found | `InvalidInstanceId: i-0123456789abcdef0` | Verify instance ID and state |
-| SSM Agent Issues | `Failed to connect to the instance` | Ensure SSM agent is running |
-| Permission Denied | `User not authorized to perform ssm:SendCommand` | Check IAM permissions |
-| Command Timeout | `CommandTimedOut` | Increase timeout value |
-| File Not Found | `Failed to read local file: File not found` | Verify the local file path |
-| Write Permission | `Failed to write file to remote path` | Check permissions on the remote directory |
+| Issue                | Error Message                                    | Solution                                   |
+| -------------------- | ------------------------------------------------ | ------------------------------------------ |
+| Authentication Error | `Could not load credentials from any providers`  | Ensure you have valid AWS credentials configured through environment variables or config files |
+| Instance Not Found   | `InvalidInstanceId: i-0123456789abcdef0`         | Verify instance ID and state              |
+| SSM Agent Issues     | `Failed to connect to the instance`              | Ensure SSM agent is running               |
+| Permission Denied    | `User not authorized to perform ssm:SendCommand` | Check IAM permissions                      |
+| Sudo Required        | `Failed to write file to remote path`            | Use the `--sudo` flag for operations requiring elevated privileges |
+| Command Timeout      | `CommandTimedOut`                                | Increase timeout value                     |
+| File Not Found       | `Failed to read local file: File not found`      | Verify the local file path                |
+| Write Permission     | `Failed to write file to remote path`            | Check permissions on the remote directory or use `--sudo` |
 
 ### Diagnostic Commands
 
@@ -344,6 +346,7 @@ To integrate with your AI assistant, copy and paste the following instructions i
     | Parameter         | Description                  | Default          | Example                 |
     | ----------------- | ---------------------------- | ---------------- | ----------------------- |
     | `--region`        | AWS region for the operation | `ap-southeast-1` | `us-east-1`             |
+    | `--sudo`          | Use sudo for commands/files  | `false`          | `--sudo`                |
     | `--wait`          | Wait for command completion  | `true`           | `false`                 |
     | `--timeout`       | Command timeout in seconds   | `600`            | `1800`                  |
     | `--output-format` | Output format (json, text)   | `text`           | `json`                  |
@@ -370,6 +373,12 @@ To integrate with your AI assistant, copy and paste the following instructions i
     # Transfer a configuration file
     aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./config.json --remote-file /home/ec2-user/config.json
 
+    # Transfer file to a directory that might not exist (directories are created automatically)
+    aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./app.config --remote-file /opt/myapp/config/app.config
+
+    # Transfer a file with sudo privileges (for writing to protected directories)
+    aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./nginx.conf --remote-file /etc/nginx/nginx.conf --sudo
+
     # Transfer a script, make it executable, and run it
     aws-send-ssm-command --target i-0123456789abcdef0 --local-file ./setup.sh --remote-file /home/ec2-user/setup.sh
     aws-send-ssm-command --target i-0123456789abcdef0 --command "chmod +x /home/ec2-user/setup.sh && /home/ec2-user/setup.sh"
@@ -381,6 +390,9 @@ To integrate with your AI assistant, copy and paste the following instructions i
     ### Advanced Usage
 
     ```bash
+    # Run a command with sudo privileges
+    aws-send-ssm-command --target i-0123456789abcdef0 --command "apt update && apt upgrade -y" --sudo
+
     # Run a complex multi-line command
     aws-send-ssm-command --target i-0123456789abcdef0 --command "
     find /var/log -name \\"*.log\\" -mtime -1 |
@@ -462,9 +474,10 @@ To integrate with your AI assistant, copy and paste the following instructions i
     | Instance Not Found   | `InvalidInstanceId: i-0123456789abcdef0`         | Verify instance ID and state              |
     | SSM Agent Issues     | `Failed to connect to the instance`              | Ensure SSM agent is running               |
     | Permission Denied    | `User not authorized to perform ssm:SendCommand` | Check IAM permissions                      |
+    | Sudo Required        | `Failed to write file to remote path`            | Use the `--sudo` flag for operations requiring elevated privileges |
     | Command Timeout      | `CommandTimedOut`                                | Increase timeout value                     |
     | File Not Found       | `Failed to read local file: File not found`      | Verify the local file path                |
-    | Write Permission     | `Failed to write file to remote path`            | Check permissions on the remote directory |
+    | Write Permission     | `Failed to write file to remote path`            | Check permissions on the remote directory or use `--sudo` |
 
     ### Diagnostic Commands
 

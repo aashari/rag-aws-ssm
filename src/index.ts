@@ -18,6 +18,7 @@ program
   .option('--command <command>', 'Bash command to run')
   .option('--local-file <path>', 'Local file to upload to the instance')
   .option('--remote-file <path>', 'Remote path where the file should be saved')
+  .option('--sudo', 'Run commands or file operations with sudo privileges')
   .option('--wait', 'Wait for command to complete', true)
   .option('--region <region>', 'AWS region', 'ap-southeast-1');
 
@@ -277,12 +278,25 @@ function readLocalFile(filePath: string): string {
  * Generate a command to write base64 content to a remote file
  * @param base64Content Base64-encoded file content
  * @param remotePath Destination path on the remote instance
+ * @param useSudo Whether to use sudo for the command
  * @returns A shell command string
  */
-function generateFileTransferCommand(base64Content: string, remotePath: string): string {
-  // Create shell command to decode base64 and write to file
+function generateFileTransferCommand(base64Content: string, remotePath: string, useSudo: boolean = false): string {
+  const sudoPrefix = useSudo ? 'sudo ' : '';
+  const dirPath = remotePath.substring(0, remotePath.lastIndexOf('/'));
+  
   return `
-echo '${base64Content}' | base64 --decode > "${remotePath}"
+# Ensure destination directory exists
+if [ ! -d "${dirPath}" ]; then
+  ${sudoPrefix}mkdir -p "${dirPath}"
+  if [ $? -ne 0 ]; then
+    echo "Failed to create directory: ${dirPath}"
+    exit 1
+  fi
+fi
+
+# Transfer the file
+${sudoPrefix}bash -c "echo '${base64Content}' | base64 --decode > \\"${remotePath}\\""
 if [ $? -eq 0 ]; then
   echo "File successfully transferred to ${remotePath}"
   ls -la "${remotePath}"
@@ -293,36 +307,61 @@ fi
 `;
 }
 
-async function main() {
-  const { target, command, localFile, remoteFile, region, wait } = options;
+const main = async () => {
+  const { target, command, region, wait, localFile, remoteFile, sudo } = program.opts();
   
+  // Validate input: either command or file transfer params must be provided
+  if (!command && !(localFile && remoteFile)) {
+    console.error('Error: Please provide either --command OR both --local-file and --remote-file');
+    process.exit(1);
+  }
+  
+  if (command && (localFile || remoteFile)) {
+    console.error('Error: Please provide either --command OR --local-file/--remote-file, not both');
+    process.exit(1);
+  }
+  
+  // Prepare the command to execute
   let effectiveCommand = command;
-  let operationType = 'command execution';
+  let operationType = 'command';
+  let additionalInfo = '';
   
-  // If using file transfer, generate the appropriate command
-  if (localFile && remoteFile) {
-    try {
+  try {
+    // Handle file transfer
+    if (localFile && remoteFile) {
       operationType = 'file transfer';
       const fileContent = readLocalFile(localFile);
-      effectiveCommand = generateFileTransferCommand(fileContent, remoteFile);
+      effectiveCommand = generateFileTransferCommand(fileContent, remoteFile, sudo);
       
       // Get file size for reporting
       const stats = fs.statSync(localFile);
-      const fileSizeKB = (stats.size / 1024).toFixed(2);
+      const fileSizeKB = Math.round(stats.size / 1024);
       const fileName = path.basename(localFile);
+      additionalInfo = `${fileSizeKB} KB`;
       
       // Include file size in log
       printInfo('FILE TRANSFER INITIATED', {
         'Source File': localFile,
         'Destination': remoteFile,
         'File Size': `${fileSizeKB} KB`,
-        'File Name': fileName
+        'File Name': fileName,
+        'Using Sudo': sudo ? 'Yes' : 'No'
       });
-    } catch (error) {
-      printError('Failed to prepare file for transfer', error, 
-        'Ensure the file exists and you have permission to read it.');
-      process.exit(1);
+    } else if (command) {
+      // If sudo flag is provided, prefix the command with sudo
+      effectiveCommand = sudo ? `sudo ${command}` : command;
+      
+      printInfo('SENDING COMMAND', {
+        'Target Instance': target,
+        'Region': region,
+        'Command': effectiveCommand,
+        'Using Sudo': sudo ? 'Yes' : 'No'
+      });
     }
+  } catch (error) {
+    printError('Failed to prepare command', error, 
+      'Ensure your inputs are valid and you have the necessary permissions.');
+    process.exit(1);
   }
   
   // Get current timestamp for command send
