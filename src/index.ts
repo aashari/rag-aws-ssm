@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('aws-send-ssm-command')
   .description('Send commands to AWS instances via SSM')
-  .version('1.2.1')
+  .version('1.2.2')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
   .option('--command <command>', 'Bash command to run')
   .option('--local-file <path>', 'Local file to upload to the instance')
