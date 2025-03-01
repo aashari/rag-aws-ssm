@@ -1,18 +1,21 @@
 {
   "name": "rag-aws-ssm-command",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "module": "src/index.ts",
   "type": "module",
   "private": false,
   "description": "A utility for executing shell commands and transferring files to AWS EC2 instances via SSM with enhanced output formatting, part of the RAG tool suite",
   "bin": {
-    "rag-aws-ssm-command": "./src/index.ts"
+    "rag-aws-ssm-command": "./dist/index.js"
   },
   "scripts": {
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/commander": "^2.12.5",
+    "@types/node": "^20.10.0",
     "@types/progress": "^2.0.7"
   },
   "peerDependencies": {

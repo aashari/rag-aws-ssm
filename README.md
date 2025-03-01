@@ -4,7 +4,7 @@
 
 `rag-aws-ssm-command` is a utility built with the [AWS SDK](https://aws.amazon.com/sdk-for-javascript/) to send shell commands and transfer files to AWS EC2 instances via Systems Manager (SSM). It provides detailed output formatting and supports both CLI usage for direct operations and potential AI integration (though primarily CLI-focused in this version). Ideal for developers managing EC2 instances and AI systems automating AWS workflows.
 
-- **Version**: 2.0.0
+- **Version**: 2.1.0
 - **License**: Open-source (MIT, see [LICENSE](LICENSE))
 - **Repository**: [github.com/aashari/rag-aws-ssm-command](https://github.com/aashari/rag-aws-ssm-command) _(Update with actual repo URL)_
 - **Author**: Andi Ashari
@@ -42,13 +42,51 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "
 npx -y github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
 ```
 
-To contribute or modify, clone the repository:
+### Installing Locally
+
+If you prefer to install the tool locally without publishing to npm, you have two simple options:
+
+#### Option 1: Install Directly from GitHub
+
+This is the easiest way to install the tool globally on your machine:
 
 ```bash
+# Using Bun (Recommended)
+bun install -g github:aashari/rag-aws-ssm-command
+
+# Using npm
+npm install -g github:aashari/rag-aws-ssm-command
+```
+
+After installation, you can run it directly:
+
+```bash
+rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+```
+
+#### Option 2: Clone and Install Locally
+
+For development or customization:
+
+```bash
+# Clone the repository
 git clone https://github.com/aashari/rag-aws-ssm-command.git
 cd rag-aws-ssm-command
-bun install
-bun run src/index.ts
+
+# Install dependencies
+bun install  # or npm install
+
+# Build the project
+npm run build
+
+# Link the package globally
+bun link     # or npm link
+```
+
+After linking, you can run it directly:
+
+```bash
+rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
 ```
 
 ---
