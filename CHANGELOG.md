@@ -2,6 +2,12 @@
 
 All notable changes to the `rag-aws-ssm-command` project will be documented in this file.
 
+## [2.1.1] - 2024-07-10
+
+### Changed
+- Updated @aws-sdk/client-ssm from 3.758.0 to 3.759.0
+- Updated @types/node from 20.10.0 to 20.17.21
+
 ## [2.1.0] - 2024-07-10
 
 ### Added
