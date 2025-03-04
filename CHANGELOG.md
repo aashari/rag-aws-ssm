@@ -5,7 +5,7 @@ All notable changes to the `rag-aws-ssm` project will be documented in this file
 ## [3.1.1] - 2025-03-04
 
 ### Changed
-- **BREAKING**: Rebranded from `rag-aws-ssm-command` to `rag-aws-ssm`
+- **BREAKING**: Rebranded from `rag-aws-ssm` to `rag-aws-ssm`
 - **BREAKING**: Implemented subcommand structure with `command` and `copy` subcommands
 - **BREAKING**: Changed parameter names for better clarity:
   - `--command` → `--cmd` (in command subcommand)

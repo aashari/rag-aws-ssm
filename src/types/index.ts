@@ -1,5 +1,5 @@
 /**
- * Types for rag-aws-ssm-command
+ * Types for rag-aws-ssm
  */
 
 export interface CommandOptions {

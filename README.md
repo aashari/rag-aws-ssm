@@ -4,7 +4,7 @@
 
 `rag-aws-ssm` is a utility built with the [AWS SDK](https://aws.amazon.com/sdk-for-javascript/) to send shell commands and transfer files to AWS EC2 instances via Systems Manager (SSM). It provides detailed output formatting and supports both CLI usage for direct operations and potential AI integration (though primarily CLI-focused in this version). Ideal for developers managing EC2 instances and AI systems automating AWS workflows.
 
-- **Version**: 3.1.1
+- **Version**: 3.1.2
 - **License**: Open-source (MIT, see [LICENSE](LICENSE))
 - **Repository**: [github.com/aashari/rag-aws-ssm](https://github.com/aashari/rag-aws-ssm) _(Update with actual repo URL)_
 - **Author**: Andi Ashari
