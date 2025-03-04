@@ -1,34 +1,51 @@
 # Changelog
 
-All notable changes to the `rag-aws-ssm-command` project will be documented in this file.
+All notable changes to the `rag-aws-ssm` project will be documented in this file.
 
-## [2.1.1] - 2024-07-10
-
-### Changed
-- Updated @aws-sdk/client-ssm from 3.758.0 to 3.759.0
-- Updated @types/node from 20.10.0 to 20.17.21
-
-## [2.1.0] - 2024-07-10
-
-### Added
-- Added TypeScript type definitions for commander package
-- Added detailed installation instructions in README.md
-- Added CHANGELOG.md to track project changes
+## [3.0.0] - 2024-03-XX
 
 ### Changed
-- Updated shebang line in index.ts for better compatibility
-- Improved documentation for local installation options
-- Removed npm publishing references from documentation
+- **BREAKING**: Rebranded from `rag-aws-ssm-command` to `rag-aws-ssm`
+- **BREAKING**: Implemented subcommand structure with `command` and `copy` subcommands
+- **BREAKING**: Changed parameter names for better clarity:
+  - `--command` → `--cmd` (in command subcommand)
+  - `--local-file` → `--local` (in copy subcommand)
+  - `--remote-file` → `--remote` (in copy subcommand)
+- Updated documentation to reflect new command structure
+
+## [2.1.1] - 2024-03-01
 
 ### Fixed
-- Fixed TypeScript module resolution errors
-- Added @types/node for proper Node.js type support
+- Improved error handling for AWS SSM service errors
+- Fixed file transfer progress reporting
 
-## [2.0.0] - Initial Release
+## [2.1.0] - 2024-02-28
 
-- Initial release of rag-aws-ssm-command
-- Command execution on EC2 instances via SSM
-- File transfer to EC2 instances with base64 encoding
-- Sudo support for commands and file operations
+### Added
+- Enhanced output formatting for better readability
+- Added detailed metadata in command output
+- Improved error suggestions based on common AWS SSM issues
+
+### Changed
+- Optimized polling mechanism for command status
+- Updated dependencies to latest versions
+
+## [2.0.0] - 2024-02-15
+
+### Added
+- Support for file transfer operations
+- Base64 encoding for secure file transfers
+- Sudo support for both command execution and file operations
+
+### Changed
+- Complete rewrite in TypeScript
+- Improved command-line interface with better option validation
+- Enhanced error handling and user feedback
+
+## [1.0.0] - 2024-01-30
+
+### Added
+- Initial release with basic command execution functionality
+- Support for AWS SSM SendCommand and GetCommandInvocation
 - Wait option for command completion
-- Rich output formatting with metadata 
+- Basic error handling 

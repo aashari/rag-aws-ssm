@@ -1,12 +1,12 @@
-# rag-aws-ssm-command
+# rag-aws-ssm
 
 **AWS SSM Command and File Transfer Tool for Humans and AI**
 
-`rag-aws-ssm-command` is a utility built with the [AWS SDK](https://aws.amazon.com/sdk-for-javascript/) to send shell commands and transfer files to AWS EC2 instances via Systems Manager (SSM). It provides detailed output formatting and supports both CLI usage for direct operations and potential AI integration (though primarily CLI-focused in this version). Ideal for developers managing EC2 instances and AI systems automating AWS workflows.
+`rag-aws-ssm` is a utility built with the [AWS SDK](https://aws.amazon.com/sdk-for-javascript/) to send shell commands and transfer files to AWS EC2 instances via Systems Manager (SSM). It provides detailed output formatting and supports both CLI usage for direct operations and potential AI integration (though primarily CLI-focused in this version). Ideal for developers managing EC2 instances and AI systems automating AWS workflows.
 
 - **Version**: 2.1.1
 - **License**: Open-source (MIT, see [LICENSE](LICENSE))
-- **Repository**: [github.com/aashari/rag-aws-ssm-command](https://github.com/aashari/rag-aws-ssm-command) _(Update with actual repo URL)_
+- **Repository**: [github.com/aashari/rag-aws-ssm](https://github.com/aashari/rag-aws-ssm) _(Update with actual repo URL)_
 - **Author**: Andi Ashari
 
 ---
@@ -36,10 +36,10 @@ Run directly from GitHub using `bunx` or `npx`:
 
 ```bash
 # Using Bun (Recommended)
-bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 
 # Using Node.js/npm
-npx -y github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+npx -y github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 ```
 
 ### Installing Locally
@@ -52,16 +52,16 @@ This is the easiest way to install the tool globally on your machine:
 
 ```bash
 # Using Bun (Recommended)
-bun install -g github:aashari/rag-aws-ssm-command
+bun install -g github:aashari/rag-aws-ssm
 
 # Using npm
-npm install -g github:aashari/rag-aws-ssm-command
+npm install -g github:aashari/rag-aws-ssm
 ```
 
 After installation, you can run it directly:
 
 ```bash
-rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 ```
 
 #### Option 2: Clone and Install Locally
@@ -70,8 +70,8 @@ For development or customization:
 
 ```bash
 # Clone the repository
-git clone https://github.com/aashari/rag-aws-ssm-command.git
-cd rag-aws-ssm-command
+git clone https://github.com/aashari/rag-aws-ssm.git
+cd rag-aws-ssm
 
 # Install dependencies
 bun install  # or npm install
@@ -86,7 +86,7 @@ bun link     # or npm link
 After linking, you can run it directly:
 
 ```bash
-rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 ```
 
 ---
@@ -95,16 +95,16 @@ rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
 
 ### CLI Mode
 
-Execute commands or transfer files to EC2 instances.
+Execute commands or transfer files to EC2 instances using subcommands.
 
 #### Run a Command
 
 ```bash
 # Using Bun
-bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 
 # Using Node.js/npm
-npx -y github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+npx -y github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 ```
 
 **Output**: Disk usage info with execution metadata.
@@ -112,7 +112,7 @@ npx -y github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command
 #### Transfer a File
 
 ```bash
-bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./myfile.txt --remote-file /home/ec2-user/myfile.txt
+bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./myfile.txt --remote /home/ec2-user/myfile.txt
 ```
 
 **Output**: File transfer status and metadata.
@@ -120,7 +120,7 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-fil
 #### Run a Command with Sudo
 
 ```bash
-bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "apt update" --sudo
+bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "apt update" --sudo
 ```
 
 **Output**: Command output with sudo execution details.
@@ -128,28 +128,39 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "
 #### Transfer a File to a Protected Directory
 
 ```bash
-bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./nginx.conf --remote-file /etc/nginx/nginx.conf --sudo
+bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./nginx.conf --remote /etc/nginx/nginx.conf --sudo
 ```
 
 **Output**: File transfer confirmation with sudo privileges.
 
 #### CLI Options
 
-| Option          | Description                          | Example Value               |
-| --------------- | ------------------------------------ | --------------------------- |
-| `--target`      | EC2 instance ID (required)           | `i-0123456789abcdef0`       |
-| `--command`     | Bash command to run                  | `"df -h"`                   |
-| `--local-file`  | Local file to upload                 | `./myfile.txt`              |
-| `--remote-file` | Remote destination path              | `/home/ec2-user/myfile.txt` |
-| `--sudo`        | Use sudo privileges                  | (flag)                      |
-| `--wait`        | Wait for completion (default: true)  | (flag)                      |
-| `--region`      | AWS region (default: ap-southeast-1) | `us-west-2`                 |
+**Command Subcommand**
+
+| Option          | Description                          | Example Value           |
+| --------------- | ------------------------------------ | ----------------------- |
+| `--target`      | EC2 instance ID (required)           | `i-0123456789abcdef0`   |
+| `--cmd`         | Bash command to run (required)       | `"df -h"`               |
+| `--sudo`        | Use sudo privileges                  | (flag)                  |
+| `--wait`        | Wait for completion (default: true)  | (flag)                  |
+| `--region`      | AWS region (default: ap-southeast-1) | `us-west-2`             |
+
+**Copy Subcommand**
+
+| Option          | Description                          | Example Value           |
+| --------------- | ------------------------------------ | ----------------------- |
+| `--target`      | EC2 instance ID (required)           | `i-0123456789abcdef0`   |
+| `--local`       | Local file to upload (required)      | `./myfile.txt`          |
+| `--remote`      | Remote destination path (required)   | `/home/ec2-user/myfile.txt` |
+| `--sudo`        | Use sudo privileges                  | (flag)                  |
+| `--wait`        | Wait for completion (default: true)  | (flag)                  |
+| `--region`      | AWS region (default: ap-southeast-1) | `us-west-2`             |
 
 ---
 
 ## ForHumans
 
-### Why Use rag-aws-ssm-command?
+### Why Use rag-aws-ssm?
 
 - **Simplify EC2 Management**: Execute commands or deploy files without SSH.
 - **Detailed Feedback**: Rich output with timestamps, status, and error suggestions.
@@ -159,11 +170,11 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-fil
 
 1. Check disk space:
    ```bash
-   bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+   bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
    ```
 2. Deploy a config file:
    ```bash
-   bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./app.conf --remote-file /etc/app/app.conf --sudo
+   bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./app.conf --remote /etc/app/app.conf --sudo
    ```
 3. Review detailed output for success or troubleshooting.
 
@@ -173,7 +184,7 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-fil
 
 ### Integration with AI Systems
 
-`rag-aws-ssm-command` provides structured output suitable for AI system integration. The tool's consistent output format and error handling make it ideal for automated workflows and AI-driven infrastructure management.
+`rag-aws-ssm` provides structured output suitable for AI system integration. The tool's consistent output format and error handling make it ideal for automated workflows and AI-driven infrastructure management.
 
 ### Capabilities
 
@@ -185,7 +196,7 @@ bunx github:aashari/rag-aws-ssm-command --target i-0123456789abcdef0 --local-fil
 
 ## Roadmap
 
-Future enhancements planned for `rag-aws-ssm-command`:
+Future enhancements planned for `rag-aws-ssm`:
 
 1. **MCP Integration**: Add support for Model Control Protocol (MCP) server integration for seamless AI system communication.
 2. **Batch Operations**: Support for executing commands across multiple instances simultaneously.
@@ -219,7 +230,7 @@ src/
 
 ```bash
 bun install
-bun run src/index.ts --target i-0123456789abcdef0 --command "uptime"
+bun run src/index.ts command --target i-0123456789abcdef0 --cmd "uptime"
 ```
 
 ### Contributing
@@ -238,7 +249,7 @@ bun run src/index.ts --target i-0123456789abcdef0 --command "uptime"
 - **Error: "AccessDeniedException"**: Check IAM permissions (`ssm:SendCommand`, `ssm:GetCommandInvocation`).
 - **No Output**: Use `--wait` and check SSM Agent status on the instance.
 
-File issues at [github.com/aashari/rag-aws-ssm-command/issues](https://github.com/aashari/rag-aws-ssm-command/issues).
+File issues at [github.com/aashari/rag-aws-ssm/issues](https://github.com/aashari/rag-aws-ssm/issues).
 
 ---
 

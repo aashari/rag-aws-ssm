@@ -23,7 +23,7 @@ export async function transferFile(options: CommandOptions): Promise<void> {
     printError(
       'Both local and remote file paths are required for file transfer',
       new Error('Missing file path parameters'),
-      'Please provide both --local-file and --remote-file options'
+      'Please provide both --local and --remote options'
     );
     process.exit(1);
   }
@@ -139,8 +139,7 @@ export async function transferFile(options: CommandOptions): Promise<void> {
         responseTimeUTC: responseTime.utcTime,
         sourceFile: localFile,
         destinationFile: remoteFile,
-        fileSize: `${fileSizeKB} KB`
-      };
+        fileSize: `${fileSizeKB} KB`      };
 
       // Print file transfer result with metadata
       printCommandOutput(output.trim(), status, metadata);

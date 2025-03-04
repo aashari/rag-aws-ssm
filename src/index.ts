@@ -8,97 +8,80 @@ import { printError } from './utils/error-handling';
 const program = new Command();
 
 program
-  .name('rag-aws-ssm-command')
+  .name('rag-aws-ssm')
   .description('A utility for AWS SSM command execution and file transfer, part of the RAG tool suite')
-  .version('2.1.1')
+  .version('2.1.1');
+
+// Command subcommand
+const commandCmd = program
+  .command('command')
+  .description('Execute a shell command on an EC2 instance via SSM')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
-  .option('--command <command>', 'Bash command to run')
-  .option('--local-file <path>', 'Local file to upload to the instance')
-  .option('--remote-file <path>', 'Remote path where the file should be saved')
-  .option('--sudo', 'Run commands or file operations with sudo privileges')
+  .requiredOption('--cmd <command>', 'Bash command to run')
+  .option('--sudo', 'Run commands with sudo privileges')
   .option('--wait', 'Wait for command to complete', true)
-  .option('--region <region>', 'AWS region', 'ap-southeast-1');
+  .option('--region <region>', 'AWS region', 'ap-southeast-1')
+  .action(async (options) => {
+    try {
+      // Convert options to our CommandOptions type
+      const cmdOptions: CommandOptions = {
+        target: options.target,
+        command: options.cmd,
+        sudo: options.sudo,
+        wait: options.wait,
+        region: options.region
+      };
+      
+      await executeCommand(cmdOptions);
+    } catch (error) {
+      printError('Failed to execute command', error, 'Check your inputs and AWS configuration');
+      process.exit(1);
+    }
+  });
+
+// Copy subcommand
+const copyCmd = program
+  .command('copy')
+  .description('Transfer a file to an EC2 instance via SSM')
+  .requiredOption('--target <instanceId>', 'EC2 instance ID')
+  .requiredOption('--local <path>', 'Local file to upload to the instance')
+  .requiredOption('--remote <path>', 'Remote path where the file should be saved')
+  .option('--sudo', 'Use sudo privileges for file operations')
+  .option('--wait', 'Wait for file transfer to complete', true)
+  .option('--region <region>', 'AWS region', 'ap-southeast-1')
+  .action(async (options) => {
+    try {
+      // Convert options to our CommandOptions type
+      const cmdOptions: CommandOptions = {
+        target: options.target,
+        localFile: options.local,
+        remoteFile: options.remote,
+        sudo: options.sudo,
+        wait: options.wait,
+        region: options.region
+      };
+      
+      await transferFile(cmdOptions);
+    } catch (error) {
+      printError('Failed to transfer file', error, 'Check your inputs and AWS configuration');
+      process.exit(1);
+    }
+  });
 
 // Add help text with examples
 program.addHelpText('after', `
 Examples:
   To run a command:
-    $ rag-aws-ssm-command --target i-0123456789abcdef0 --command "df -h"
+    $ rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
 
   To transfer a file:
-    $ rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./myfile.txt --remote-file /home/ec2-user/myfile.txt
+    $ rag-aws-ssm copy --target i-0123456789abcdef0 --local ./myfile.txt --remote /home/ec2-user/myfile.txt
 
   To run a command with sudo:
-    $ rag-aws-ssm-command --target i-0123456789abcdef0 --command "apt update" --sudo
+    $ rag-aws-ssm command --target i-0123456789abcdef0 --cmd "apt update" --sudo
 
   To transfer a file to a protected directory:
-    $ rag-aws-ssm-command --target i-0123456789abcdef0 --local-file ./nginx.conf --remote-file /etc/nginx/nginx.conf --sudo
+    $ rag-aws-ssm copy --target i-0123456789abcdef0 --local ./nginx.conf --remote /etc/nginx/nginx.conf --sudo
 `);
 
-program.parse();
-
-// Convert Commander.js options to our CommandOptions type
-const options: CommandOptions = program.opts();
-
-/**
- * Validate command line options
- * @param options The command line options
- * @returns true if options are valid, otherwise false
- */
-function validateOptions(options: CommandOptions): boolean {
-  const { command, localFile, remoteFile } = options;
-
-  // Ensure either command or both local-file and remote-file are provided
-  if (!command && !(localFile && remoteFile)) {
-    printError(
-      'Invalid command options',
-      new Error('Missing required parameters'),
-      'You must provide either --command OR both --local-file and --remote-file'
-    );
-    return false;
-  }
-
-  // Ensure command and file transfer options are not mixed
-  if (command && (localFile || remoteFile)) {
-    printError(
-      'Invalid command options',
-      new Error('Conflicting parameters'),
-      'You must provide either --command OR --local-file/--remote-file, not both'
-    );
-    return false;
-  }
-
-  // If one file path is provided, the other must also be provided
-  if ((localFile && !remoteFile) || (!localFile && remoteFile)) {
-    printError(
-      'Invalid file transfer options',
-      new Error('Incomplete file transfer parameters'),
-      'When using file transfer, both --local-file and --remote-file must be provided'
-    );
-    return false;
-  }
-
-  return true;
-}
-
-async function main() {
-  // Validate command line options
-  if (!validateOptions(options)) {
-    process.exit(1);
-  }
-
-  try {
-    if (options.command) {
-      // Execute a command
-      await executeCommand(options);
-    } else if (options.localFile && options.remoteFile) {
-      // Transfer a file
-      await transferFile(options);
-    }
-  } catch (error) {
-    printError('Failed to complete operation', error, 'Check your inputs and AWS configuration');
-    process.exit(1);
-  }
-}
-
-main(); 
+program.parse(); 

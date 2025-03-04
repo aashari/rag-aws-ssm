@@ -15,7 +15,7 @@ export async function executeCommand(options: CommandOptions): Promise<void> {
     printError(
       'Command is required for command execution',
       new Error('Missing command parameter'),
-      'Please provide a command using the --command option'
+      'Please provide a command using the --cmd option'
     );
     process.exit(1);
   }
