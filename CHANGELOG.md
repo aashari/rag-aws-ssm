@@ -2,7 +2,7 @@
 
 All notable changes to the `rag-aws-ssm` project will be documented in this file.
 
-## [3.1.0] - 2025-03-04
+## [3.1.1] - 2025-03-04
 
 ### Changed
 - **BREAKING**: Rebranded from `rag-aws-ssm-command` to `rag-aws-ssm`

@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('rag-aws-ssm')
   .description('A utility for AWS SSM command execution and file transfer, part of the RAG tool suite')
-  .version('3.1.0');
+  .version('3.1.1');
 
 // Command subcommand
 program
