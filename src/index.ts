@@ -10,28 +10,26 @@ const program = new Command();
 program
   .name('rag-aws-ssm')
   .description('A utility for AWS SSM command execution and file transfer, part of the RAG tool suite')
-  .version('2.1.1');
+  .version('3.1.0');
 
 // Command subcommand
-const commandCmd = program
+program
   .command('command')
   .description('Execute a shell command on an EC2 instance via SSM')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
   .requiredOption('--cmd <command>', 'Bash command to run')
   .option('--sudo', 'Run commands with sudo privileges')
-  .option('--wait', 'Wait for command to complete', true)
+  .option('--background', 'Run command without waiting for completion')
   .option('--region <region>', 'AWS region', 'ap-southeast-1')
   .action(async (options) => {
     try {
-      // Convert options to our CommandOptions type
       const cmdOptions: CommandOptions = {
         target: options.target,
         command: options.cmd,
         sudo: options.sudo,
-        wait: options.wait,
+        wait: !options.background,
         region: options.region
       };
-      
       await executeCommand(cmdOptions);
     } catch (error) {
       printError('Failed to execute command', error, 'Check your inputs and AWS configuration');
@@ -40,27 +38,25 @@ const commandCmd = program
   });
 
 // Copy subcommand
-const copyCmd = program
+program
   .command('copy')
   .description('Transfer a file to an EC2 instance via SSM')
   .requiredOption('--target <instanceId>', 'EC2 instance ID')
   .requiredOption('--local <path>', 'Local file to upload to the instance')
   .requiredOption('--remote <path>', 'Remote path where the file should be saved')
   .option('--sudo', 'Use sudo privileges for file operations')
-  .option('--wait', 'Wait for file transfer to complete', true)
+  .option('--background', 'Run file transfer without waiting for completion')
   .option('--region <region>', 'AWS region', 'ap-southeast-1')
   .action(async (options) => {
     try {
-      // Convert options to our CommandOptions type
       const cmdOptions: CommandOptions = {
         target: options.target,
         localFile: options.local,
         remoteFile: options.remote,
         sudo: options.sudo,
-        wait: options.wait,
+        wait: !options.background,
         region: options.region
       };
-      
       await transferFile(cmdOptions);
     } catch (error) {
       printError('Failed to transfer file', error, 'Check your inputs and AWS configuration');

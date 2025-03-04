@@ -4,7 +4,7 @@
 
 `rag-aws-ssm` is a utility built with the [AWS SDK](https://aws.amazon.com/sdk-for-javascript/) to send shell commands and transfer files to AWS EC2 instances via Systems Manager (SSM). It provides detailed output formatting and supports both CLI usage for direct operations and potential AI integration (though primarily CLI-focused in this version). Ideal for developers managing EC2 instances and AI systems automating AWS workflows.
 
-- **Version**: 2.1.1
+- **Version**: 3.1.0
 - **License**: Open-source (MIT, see [LICENSE](LICENSE))
 - **Repository**: [github.com/aashari/rag-aws-ssm](https://github.com/aashari/rag-aws-ssm) _(Update with actual repo URL)_
 - **Author**: Andi Ashari
@@ -142,7 +142,7 @@ bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./ngin
 | `--target`      | EC2 instance ID (required)           | `i-0123456789abcdef0`   |
 | `--cmd`         | Bash command to run (required)       | `"df -h"`               |
 | `--sudo`        | Use sudo privileges                  | (flag)                  |
-| `--wait`        | Wait for completion (default: true)  | (flag)                  |
+| `--background`  | Run command without waiting          | (flag)                  |
 | `--region`      | AWS region (default: ap-southeast-1) | `us-west-2`             |
 
 **Copy Subcommand**
@@ -153,8 +153,23 @@ bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./ngin
 | `--local`       | Local file to upload (required)      | `./myfile.txt`          |
 | `--remote`      | Remote destination path (required)   | `/home/ec2-user/myfile.txt` |
 | `--sudo`        | Use sudo privileges                  | (flag)                  |
-| `--wait`        | Wait for completion (default: true)  | (flag)                  |
+| `--background`  | Run file transfer without waiting    | (flag)                  |
 | `--region`      | AWS region (default: ap-southeast-1) | `us-west-2`             |
+
+### Example Workflow
+
+1. Check disk space:
+   ```bash
+   bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "df -h"
+   ```
+2. Deploy a config file:
+   ```bash
+   bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./app.conf --remote /etc/app/app.conf --sudo
+   ```
+3. Run a command in the background:
+   ```bash
+   bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "apt update" --background
+   ```
 
 ---
 
@@ -176,7 +191,11 @@ bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./ngin
    ```bash
    bunx github:aashari/rag-aws-ssm copy --target i-0123456789abcdef0 --local ./app.conf --remote /etc/app/app.conf --sudo
    ```
-3. Review detailed output for success or troubleshooting.
+3. Run a command in the background:
+   ```bash
+   bunx github:aashari/rag-aws-ssm command --target i-0123456789abcdef0 --cmd "apt update" --background
+   ```
+4. Review detailed output for success or troubleshooting.
 
 ---
 
