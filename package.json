@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.759.0",
-    "commander": "^13.1.0",
+    "commander": "^13.1.1",
     "progress": "^2.0.3"
   }
 }
